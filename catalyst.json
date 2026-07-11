@@ -1,0 +1,12 @@
+{
+  "slate": [
+    {
+      "name": "react-vite",
+      "source": "C:\\Users\\HRJ\\Desktop\\ksp-crime-platform\\FRONTEND",
+      "build": {
+        "command": "npm ci && npm run build",
+        "publish_directory": "dist"
+      }
+    }
+  ]
+}
