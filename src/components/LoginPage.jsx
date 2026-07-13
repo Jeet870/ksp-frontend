@@ -4,22 +4,21 @@ import { login } from "../utils/api";
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
 
   const handleLogin = async () => {
     setError("");
-    if (!username || !password || !role) {
+    if (!username || !password) {
       setError("Please fill in all fields.");
       return;
     }
     setLoading(true);
     try {
-      const data = await login(username, password, role);
+      const data = await login(username, password);
       onLogin(data);
     } catch (e) {
-      setError(e.message || "Cannot connect to server. Is FastAPI running?");
+      setError(e.message || "Cannot connect to server.");
     } finally {
       setLoading(false);
     }
@@ -44,38 +43,31 @@ export default function LoginPage({ onLogin }) {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Badge Number
+            </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. constable1 or sp1"
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              placeholder="e.g. KSP-IO-001"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="pass123"
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              placeholder="Enter your password"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            >
-              <option value="">Select your role</option>
-              <option value="Constable">Constable</option>
-              <option value="SP">SP</option>
-            </select>
           </div>
 
           <button
@@ -90,8 +82,11 @@ export default function LoginPage({ onLogin }) {
 
         <div className="mt-6 bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
           <p className="font-medium text-gray-600">Test credentials:</p>
-          <p>👮 Constable: <b>constable1</b> / pass123</p>
-          <p>🎖️ SP: <b>sp1</b> / pass123</p>
+          <p>👮 Constable: <b>KSP-CON-001</b> / ksp1234</p>
+          <p>🕵️ IO: <b>KSP-IO-001</b> / ksp1234</p>
+          <p>🎖️ SP: <b>KSP-SP-001</b> / ksp1234</p>
+          <p>📊 Analyst: <b>KSP-ANA-001</b> / ksp1234</p>
+          <p>⭐ Director: <b>KSP-DIR-001</b> / ksp1234</p>
         </div>
       </div>
     </div>
