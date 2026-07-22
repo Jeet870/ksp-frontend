@@ -10,19 +10,18 @@ export default function LoginPage({ onLogin }) {
 
   const handleLogin = async () => {
     setError("");
-    if (!username || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
+    if (!username || !password) { setError("Please fill in all fields."); return; }
     setLoading(true);
     try {
       const data = await login(username, password);
       onLogin(data);
     } catch (e) {
       setError(e.message || "Cannot connect to server. Is FastAPI running?");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
@@ -31,7 +30,7 @@ export default function LoginPage({ onLogin }) {
       <div className="login-glow" />
       <div className="login-card">
         <div className="login-logo">
-          <KSPLogo size={90} />
+          <KSPLogo size={80} />
           <div className="login-org-name">Karnataka State Police</div>
           <div className="login-title">Intelligence Platform</div>
           <div className="login-sub">Secure Officer Access Portal · "ಸೇವೆಯೇ ಸಾಧನ"</div>
@@ -46,7 +45,9 @@ export default function LoginPage({ onLogin }) {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="e.g. KSP-CON-001"
+            autoCapitalize="none"
           />
         </div>
 
@@ -57,6 +58,7 @@ export default function LoginPage({ onLogin }) {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Enter your password"
           />
         </div>
