@@ -24,3 +24,27 @@ export async function askQuestion(question, sessionId, token) {
   if (!res.ok) throw new Error(data.detail || "Request failed");
   return data;
 }
+
+export async function search(query, token) {
+  const res = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Search failed");
+  return data;
+}
+
+export async function getMyCases(token) {
+  const res = await fetch(`${BASE_URL}/my-cases`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to load cases");
+  return data;
+}
