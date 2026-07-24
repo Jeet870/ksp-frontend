@@ -45,6 +45,21 @@ export default function DashboardLayout({ auth, onLogout }) {
 
   const closeSidebar = () => setSidebarOpen(false);
 
+  // Clears this officer's chat history/session before actually logging out,
+  // so nothing lingers that a future login on this browser could stumble into.
+  // (Per-officer storage keys already prevent cross-officer leakage even
+  // without this, but this keeps things tidy and avoids localStorage
+  // accumulating indefinitely across many officers on a shared machine.)
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem(`ksp_chat_session_id_${auth.token}`);
+      localStorage.removeItem(`ksp_chat_messages_${auth.token}`);
+    } catch {
+      // localStorage unavailable (private browsing etc.) — safe to ignore
+    }
+    onLogout();
+  };
+
   return (
     <div className="app-shell">
       {/* Mobile overlay */}
@@ -81,7 +96,7 @@ export default function DashboardLayout({ auth, onLogout }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout-btn" onClick={onLogout}>
+          <button className="logout-btn" onClick={handleLogout}>
             <span>🚪</span>
             <span>Logout</span>
           </button>
