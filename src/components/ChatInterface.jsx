@@ -1,19 +1,53 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { askQuestion } from "../utils/api";
 
+const SESSION_KEY_PREFIX = "ksp_chat_session_id_";
+const MESSAGES_KEY_PREFIX = "ksp_chat_messages_";
+
+function getOrCreateSessionId(officerKey) {
+  const key = SESSION_KEY_PREFIX + officerKey;
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
+function loadStoredMessages(officerKey, defaultGreeting) {
+  try {
+    const raw = localStorage.getItem(MESSAGES_KEY_PREFIX + officerKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore corrupt storage, fall back to default
+  }
+  return [defaultGreeting];
+}
+
 export default function ChatInterface({ auth }) {
-  const [sessionId] = useState(() => crypto.randomUUID());
-  const [messages, setMessages] = useState([
-    {
+  // Use the officer's own token as the storage scope key so two different
+  // officers logging in on the same browser never see each other's chat.
+  const officerKey = auth.token;
+  const [sessionId] = useState(() => getOrCreateSessionId(officerKey));
+  const [messages, setMessages] = useState(() =>
+    loadStoredMessages(officerKey, {
       id: 1, role: "agent",
       text: `Namaskara ${auth.name}! I am the KSP Intelligence Assistant. How can I help you today?`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ]);
+    })
+  );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+
+  // Save every time messages changes, so navigating away doesn't lose history.
+  useEffect(() => {
+    localStorage.setItem(MESSAGES_KEY_PREFIX + officerKey, JSON.stringify(messages));
+  }, [messages, officerKey]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
