@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { search } from "../utils/api";
+import { search } from "../../utils/api";
 
 export default function Search({ auth }) {
   const [query, setQuery] = useState("");
