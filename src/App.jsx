@@ -1,4 +1,5 @@
-import CrimeNetworkGraph from "./components/CrimeNetworkGraph";import { useState } from "react";
+import CrimeNetworkGraph from "./components/CrimeNetworkGraph";
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import DashboardLayout from "./components/DashboardLayout";
@@ -38,8 +39,8 @@ function App() {
         >
           <Route index element={<Navigate to="/chat" replace />} />
           <Route path="chat" element={<ChatInterface auth={auth} />} />
-          <Route path="my-cases" element={<MyCases />} />
-          <Route path="search" element={<Search />} />
+          <Route path="my-cases" element={<MyCases auth={auth} />} />
+          <Route path="search" element={<Search auth={auth} />} />
           <Route path="district-overview" element={<DistrictOverview />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="forecast" element={<Forecast />} />
