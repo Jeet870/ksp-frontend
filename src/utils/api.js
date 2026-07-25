@@ -48,3 +48,43 @@ export async function getMyCases(token) {
   if (!res.ok) throw new Error(data.detail || "Failed to load cases");
   return data;
 }
+
+export async function getDistrictOverview(token) {
+  const res = await fetch(`${BASE_URL}/district-overview`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to load district overview");
+  return data;
+}
+
+export async function getAnalytics(token) {
+  const res = await fetch(`${BASE_URL}/analytics`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to load analytics");
+  return data;
+}
+
+export async function getForecast(token) {
+  const res = await fetch(`${BASE_URL}/forecast`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to load forecast");
+  return data;
+}
+
+export async function getMapView(token) {
+  const res = await fetch(`${BASE_URL}/map`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to load map data");
+  return data;
+}
