@@ -41,10 +41,10 @@ function App() {
           <Route path="chat" element={<ChatInterface auth={auth} />} />
           <Route path="my-cases" element={<MyCases auth={auth} />} />
           <Route path="search" element={<Search auth={auth} />} />
-          <Route path="district-overview" element={<DistrictOverview />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="forecast" element={<Forecast />} />
-          <Route path="map" element={<MapView />} />
+          <Route path="district-overview" element={<DistrictOverview auth={auth} />} />
+          <Route path="analytics" element={<Analytics auth={auth} />} />
+          <Route path="forecast" element={<Forecast auth={auth} />} />
+          <Route path="map" element={<MapView auth={auth} />} />
           <Route path="*" element={<Navigate to="/chat" replace />} />
           <Route path="graph" element={<CrimeNetworkGraph auth={auth} />} />
         </Route>
