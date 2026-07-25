@@ -1,95 +1,61 @@
-import { useState } from "react";
-import { login } from "../utils/api";
-import KSPLogo from "./KSPLogo";
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import json, base64
 
-export default function LoginPage({ onLogin }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(false);
+app = FastAPI()
 
-  const handleLogin = async () => {
-    setError("");
-    if (!username || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await login(username, password);
-      onLogin(data);
-    } catch (e) {
-      setError(e.message || "Cannot connect to server. Is FastAPI running?");
-    } finally {
-      setLoading(false);
-    }
-  };
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-  const handleKey = (e) => {
-    if (e.key === "Enter") handleLogin();
-  };
-
-  return (
-    <div className="login-page">
-      <div className="login-grid-bg" />
-      <div className="login-glow" />
-
-      <div className="login-card">
-        <div className="login-logo">
-          <KSPLogo size={80} />
-          <div className="login-org-name">Karnataka State Police</div>
-          <div className="login-title">Intelligence Platform</div>
-          <div className="login-sub">
-            Secure Officer Access Portal · "ಸೇವೆಯೇ ಸಾಧನ"
-          </div>
-        </div>
-
-        {error && <div className="error-box">⚠️ {error}</div>}
-
-        <div className="form-group">
-          <label className="form-label">Officer ID / Username</label>
-          <input
-            className="form-input"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="e.g. KSP-CON-001"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck="false"
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <input
-            className="form-input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Enter your password"
-          />
-        </div>
-
-        <button
-          className="login-btn"
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          {loading ? "Verifying credentials..." : "🔐 Sign In to Platform"}
-        </button>
-
-        <div className="creds-box">
-          <div className="creds-title">Test Credentials</div>
-          <div>👮 <strong>KSP-CON-001</strong> / ksp1234 — Constable</div>
-          <div>🕵️ <strong>KSP-IO-001</strong> / ksp1234 — IO</div>
-          <div>🎖️ <strong>KSP-SP-001</strong> / ksp1234 — SP</div>
-          <div>📊 <strong>KSP-ANA-001</strong> / ksp1234 — Analyst</div>
-          <div>⭐ <strong>KSP-DIR-001</strong> / ksp1234 — Director</div>
-        </div>
-      </div>
-    </div>
-  );
+FAKE_USERS = {
+    "KSP-CON-001": {"password": "ksp1234", "role": "Constable", "name": "Ravi Kumar"},
+    "KSP-IO-001":  {"password": "ksp1234", "role": "IO",        "name": "Suresh Naik"},
+    "KSP-SP-001":  {"password": "ksp1234", "role": "SP",        "name": "Priya Sharma"},
+    "KSP-ANA-001": {"password": "ksp1234", "role": "Analyst",   "name": "Meena Rao"},
+    "KSP-DIR-001": {"password": "ksp1234", "role": "Director",  "name": "Vikram Singh"},
 }
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class AskRequest(BaseModel):
+    message: str
+    token: str
+
+def make_fake_jwt(username: str, role: str, name: str) -> str:
+    header  = base64.urlsafe_b64encode(b'{"alg":"HS256","typ":"JWT"}').decode().rstrip("=")
+    payload = base64.urlsafe_b64encode(
+        json.dumps({"sub": username, "role": role, "name": name}).encode()
+    ).decode().rstrip("=")
+    return f"{header}.{payload}.fakesignature"
+
+def decode_fake_jwt(token: str) -> dict:
+    try:
+        payload_part = token.split(".")[1]
+        padding = 4 - len(payload_part) % 4
+        payload_part += "=" * padding
+        return json.loads(base64.urlsafe_b64decode(payload_part))
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+@app.post("/login")
+def login(req: LoginRequest):
+    user = FAKE_USERS.get(req.username)
+    if not user or user["password"] != req.password:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    token = make_fake_jwt(req.username, user["role"], user["name"])
+    return {"token": token, "role": user["role"], "name": user["name"]}
+
+@app.post("/ask")
+def ask(req: AskRequest):
+    user_data = decode_fake_jwt(req.token)
+    echo = f"[{user_data['role']}] You said: {req.message}"
+    return {"reply": echo}
