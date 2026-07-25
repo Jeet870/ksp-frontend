@@ -3,17 +3,17 @@ import { NavLink, Outlet } from "react-router-dom";
 import KSPLogo from "./KSPLogo";
 
 const ROLE_NAV = {
-  Constable: [
+  constable: [
     { label: "Chat",     path: "/chat",     icon: "💬" },
     { label: "My Cases", path: "/my-cases", icon: "📁" },
     { label: "Search",   path: "/search",   icon: "🔍" },
   ],
-  IO: [
+  investigating_officer: [
     { label: "Chat",     path: "/chat",     icon: "💬" },
     { label: "My Cases", path: "/my-cases", icon: "📁" },
     { label: "Search",   path: "/search",   icon: "🔍" },
   ],
-  SP: [
+  district_sp: [
     { label: "Chat",              path: "/chat",             icon: "💬" },
     { label: "District Overview", path: "/district-overview",icon: "🗺️" },
     { label: "Analytics",         path: "/analytics",        icon: "📊" },
@@ -22,13 +22,13 @@ const ROLE_NAV = {
     { label: "Crime Graph",       path: "/graph",            icon: "🕸️" },
     { label: "Search",            path: "/search",           icon: "🔍" },
   ],
-  Analyst: [
+  scrb_analyst: [
     { label: "Chat",      path: "/chat",     icon: "💬" },
     { label: "Analytics", path: "/analytics",icon: "📊" },
     { label: "Forecast",  path: "/forecast", icon: "🔮" },
     { label: "Search",    path: "/search",   icon: "🔍" },
   ],
-  Director: [
+  scrb_director: [
     { label: "Chat",              path: "/chat",             icon: "💬" },
     { label: "District Overview", path: "/district-overview",icon: "🗺️" },
     { label: "Analytics",         path: "/analytics",        icon: "📊" },
@@ -41,7 +41,7 @@ const ROLE_NAV = {
 
 export default function DashboardLayout({ auth, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navItems = ROLE_NAV[auth.role] || ROLE_NAV["Constable"];
+  const navItems = ROLE_NAV[auth.role] || ROLE_NAV["constable"];
 
   const closeSidebar = () => setSidebarOpen(false);
 
