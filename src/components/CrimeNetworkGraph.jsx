@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
+import { BASE_URL } from "../utils/api";
 
 // ── Hardcoded test data (Day 15-16) ──────────────────────────────────────────
 const TEST_NODES = [
@@ -35,12 +36,10 @@ const STYLESHEET = [
       color: "#1f2937",
     },
   },
-  // accused = red
   {
     selector: "node[type='accused']",
     style: { "background-color": "#ef4444" },
   },
-  // FIR = orange
   {
     selector: "node[type='FIR']",
     style: {
@@ -51,7 +50,6 @@ const STYLESHEET = [
       "font-size": "10px",
     },
   },
-  // vehicle = blue
   {
     selector: "node[type='vehicle']",
     style: {
@@ -59,7 +57,6 @@ const STYLESHEET = [
       shape: "diamond",
     },
   },
-  // phone calls = dashed grey
   {
     selector: "edge[relationship='phone_calls']",
     style: {
@@ -74,7 +71,6 @@ const STYLESHEET = [
       color: "#6b7280",
     },
   },
-  // financial = green solid
   {
     selector: "edge[relationship='financial']",
     style: {
@@ -89,7 +85,6 @@ const STYLESHEET = [
       color: "#16a34a",
     },
   },
-  // co-accused = grey solid
   {
     selector: "edge[relationship='co-accused']",
     style: {
@@ -104,7 +99,6 @@ const STYLESHEET = [
       color: "#4b5563",
     },
   },
-  // selected node highlight
   {
     selector: "node:selected",
     style: {
@@ -130,10 +124,9 @@ export default function CrimeNetworkGraph({ auth }) {
   const [elements, setElements] = useState([...TEST_NODES, ...TEST_EDGES]);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
-  const [tooltip,  setTooltip]  = useState(null); // { x, y, label, type, district }
+  const [tooltip,  setTooltip]  = useState(null);
   const [useTest,  setUseTest]  = useState(true);
 
-  // ── Tooltip on node hover (Day 15-16) ──────────────────────────────────────
   useEffect(() => {
     const cy = cyRef.current;
     if (!cy) return;
@@ -171,7 +164,7 @@ export default function CrimeNetworkGraph({ auth }) {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/graph?fir_id=${encodeURIComponent(firId)}`,
+        `${BASE_URL}/graph?fir_id=${encodeURIComponent(firId)}`,
         {
           headers: { Authorization: `Bearer ${auth?.token || ""}` },
         }
@@ -188,7 +181,6 @@ export default function CrimeNetworkGraph({ auth }) {
         return;
       }
 
-      // Map API response to Cytoscape elements
       const nodes = data.nodes.map((n) => ({
         data: {
           id:       n.id,
@@ -216,7 +208,6 @@ export default function CrimeNetworkGraph({ auth }) {
     }
   };
 
-  // ── Export as PNG (Day 19-21) ───────────────────────────────────────────────
   const exportPNG = () => {
     const cy = cyRef.current;
     if (!cy) return;
@@ -227,7 +218,6 @@ export default function CrimeNetworkGraph({ auth }) {
     a.click();
   };
 
-  // ── Reset to test data ──────────────────────────────────────────────────────
   const resetToTest = () => {
     setElements([...TEST_NODES, ...TEST_EDGES]);
     setUseTest(true);
@@ -238,7 +228,6 @@ export default function CrimeNetworkGraph({ auth }) {
   return (
     <div className="flex flex-col h-full bg-gray-50">
 
-      {/* ── Top Bar ── */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3 flex-wrap shadow-sm">
         <h1 className="text-base font-bold text-gray-800 mr-2">🕸️ Crime Network Graph</h1>
 
@@ -274,24 +263,20 @@ export default function CrimeNetworkGraph({ auth }) {
         </button>
       </div>
 
-      {/* ── Error Message ── */}
       {error && (
         <div className="mx-6 mt-3 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2 rounded-xl">
           {error}
         </div>
       )}
 
-      {/* ── Test data badge ── */}
       {useTest && (
         <div className="mx-6 mt-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs px-4 py-2 rounded-xl">
           Showing hardcoded test data. Enter a FIR ID above to load live data.
         </div>
       )}
 
-      {/* ── Graph Area ── */}
       <div className="flex-1 relative overflow-hidden m-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
 
-        {/* Loading Spinner */}
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 rounded-2xl">
             <div className="flex flex-col items-center gap-3">
@@ -301,7 +286,6 @@ export default function CrimeNetworkGraph({ auth }) {
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && elements.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-gray-400">
@@ -312,7 +296,6 @@ export default function CrimeNetworkGraph({ auth }) {
           </div>
         )}
 
-        {/* Cytoscape Graph */}
         {elements.length > 0 && (
           <CytoscapeComponent
             elements={elements}
@@ -325,7 +308,6 @@ export default function CrimeNetworkGraph({ auth }) {
           />
         )}
 
-        {/* ── Color Legend (bottom-left) ── */}
         <div className="absolute bottom-4 left-4 bg-white border border-gray-100 rounded-xl shadow-sm px-4 py-3 text-xs space-y-1.5">
           <p className="font-semibold text-gray-700 mb-2">Legend</p>
           {LEGEND.map((item) => (
@@ -354,7 +336,6 @@ export default function CrimeNetworkGraph({ auth }) {
           ))}
         </div>
 
-        {/* ── Tooltip ── */}
         {tooltip && (
           <div
             className="fixed z-50 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg pointer-events-none"
