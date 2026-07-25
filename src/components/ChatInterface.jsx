@@ -113,6 +113,19 @@ export default function ChatInterface({ auth }) {
     recognition.start();
   };
 
+  // Neo4j graph results return nodes as nested objects (e.g. a whole
+  // Accused record as one cell's value) — flatten those into readable
+  // "key: value" text instead of letting them stringify to [object Object].
+  const formatCell = (value) => {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "object") {
+      return Object.entries(value)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ");
+    }
+    return String(value);
+  };
+
   // Renders a simple table for multi-row backend responses.
   const renderTable = (records) => {
     if (!records || records.length === 0) return null;
@@ -131,7 +144,7 @@ export default function ChatInterface({ auth }) {
             {records.map((row, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col}>{String(row[col] ?? "")}</td>
+                  <td key={col}>{formatCell(row[col])}</td>
                 ))}
               </tr>
             ))}
