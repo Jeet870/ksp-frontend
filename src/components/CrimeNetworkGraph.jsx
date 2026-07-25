@@ -121,11 +121,11 @@ const LEGEND = [
 export default function CrimeNetworkGraph({ auth }) {
   const cyRef    = useRef(null);
   const [firId,  setFirId]  = useState("");
-  const [elements, setElements] = useState([...TEST_NODES, ...TEST_EDGES]);
+  const [elements, setElements] = useState([]);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
   const [tooltip,  setTooltip]  = useState(null);
-  const [useTest,  setUseTest]  = useState(true);
+  const [useTest,  setUseTest]  = useState(false);
 
   useEffect(() => {
     const cy = cyRef.current;
@@ -226,72 +226,120 @@ export default function CrimeNetworkGraph({ auth }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#0f172a" }}>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3 flex-wrap shadow-sm">
-        <h1 className="text-base font-bold text-gray-800 mr-2">🕸️ Crime Network Graph</h1>
+
+      <div style={{
+        background: "#1e293b",
+        borderBottom: "1px solid #334155",
+        padding: "16px 24px",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        flexWrap: "wrap",
+      }}>
+        <h1 style={{ fontSize: "16px", fontWeight: 700, color: "#f1f5f9", margin: 0, marginRight: "8px", whiteSpace: "nowrap" }}>
+          🕸️ Crime Network Graph
+        </h1>
 
         <input
           type="text"
           value={firId}
           onChange={(e) => setFirId(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchGraph()}
-          placeholder="Enter FIR ID e.g. FIR-2024-001"
-          className="flex-1 min-w-48 px-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter FIR number e.g. FIR-2024-JP-002"
+          style={{
+            flex: "1 1 220px",
+            padding: "10px 14px",
+            borderRadius: "10px",
+            border: "1px solid #475569",
+            background: "#0f172a",
+            color: "#f1f5f9",
+            fontSize: "14px",
+            outline: "none",
+          }}
         />
 
         <button
           onClick={fetchGraph}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+          style={{
+            background: loading ? "#475569" : "#2563eb",
+            color: "#fff",
+            border: "none",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            fontSize: "14px",
+            fontWeight: 600,
+            cursor: loading ? "default" : "pointer",
+            whiteSpace: "nowrap",
+          }}
         >
           {loading ? "Loading..." : "Load Graph"}
         </button>
 
         <button
-          onClick={resetToTest}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition"
-        >
-          Reset Test Data
-        </button>
-
-        <button
           onClick={exportPNG}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+          style={{
+            background: "#16a34a",
+            color: "#fff",
+            border: "none",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            fontSize: "14px",
+            fontWeight: 600,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
         >
           Export PNG
         </button>
       </div>
 
       {error && (
-        <div className="mx-6 mt-3 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2 rounded-xl">
+        <div style={{
+          margin: "12px 24px 0",
+          background: "#450a0a",
+          border: "1px solid #7f1d1d",
+          color: "#fca5a5",
+          fontSize: "14px",
+          padding: "10px 16px",
+          borderRadius: "10px",
+        }}>
           {error}
         </div>
       )}
 
-      {useTest && (
-        <div className="mx-6 mt-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs px-4 py-2 rounded-xl">
-          Showing hardcoded test data. Enter a FIR ID above to load live data.
-        </div>
-      )}
-
-      <div className="flex-1 relative overflow-hidden m-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div style={{
+        flex: 1, position: "relative", overflow: "hidden", margin: "16px",
+        background: "#1e293b", borderRadius: "16px", border: "1px solid #334155",
+      }}>
 
         {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 rounded-2xl">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500 font-medium">Loading graph...</p>
+          <div style={{
+            position: "absolute", inset: 0, background: "rgba(15,23,42,0.85)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 10, borderRadius: "16px",
+          }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+              <div style={{
+                width: "40px", height: "40px", border: "4px solid #2563eb",
+                borderTopColor: "transparent", borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }} />
+              <p style={{ fontSize: "14px", color: "#94a3b8", fontWeight: 500 }}>Loading graph...</p>
             </div>
           </div>
         )}
 
         {!loading && elements.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-gray-400">
-              <p className="text-4xl mb-3">🔍</p>
-              <p className="font-medium">No graph data found</p>
-              <p className="text-sm mt-1">Try a different FIR ID or reset to test data</p>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ textAlign: "center", color: "#64748b" }}>
+              <p style={{ fontSize: "36px", marginBottom: "12px" }}>🕸️</p>
+              <p style={{ fontWeight: 500 }}>
+                {error ? "No graph data found" : "Enter a FIR number above to visualize its case network"}
+              </p>
             </div>
           </div>
         )}
@@ -308,42 +356,48 @@ export default function CrimeNetworkGraph({ auth }) {
           />
         )}
 
-        <div className="absolute bottom-4 left-4 bg-white border border-gray-100 rounded-xl shadow-sm px-4 py-3 text-xs space-y-1.5">
-          <p className="font-semibold text-gray-700 mb-2">Legend</p>
+        <div style={{
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "#0f172a", border: "1px solid #334155", borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.4)", padding: "12px 16px", fontSize: "12px",
+        }}>
+          <p style={{ fontWeight: 600, color: "#e2e8f0", marginBottom: "8px", marginTop: 0 }}>Legend</p>
           {LEGEND.map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
+            <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
               {item.shape ? (
                 <div
-                  className="w-3 h-3 rounded-sm flex-shrink-0"
                   style={{
+                    width: "12px", height: "12px", flexShrink: 0,
                     backgroundColor: item.color,
-                    borderRadius: item.shape === "circle" ? "50%" : item.shape === "diamond" ? "2px" : "2px",
+                    borderRadius: item.shape === "circle" ? "50%" : "2px",
                     transform: item.shape === "diamond" ? "rotate(45deg)" : "none",
                   }}
                 />
               ) : (
                 <div
-                  className="w-5 h-0.5 flex-shrink-0"
                   style={{
-                    backgroundColor: item.color,
+                    width: "20px", height: 0, flexShrink: 0,
                     borderTop: item.dash ? `2px dashed ${item.color}` : `2px solid ${item.color}`,
-                    background: "none",
                   }}
                 />
               )}
-              <span className="text-gray-600">{item.label}</span>
+              <span style={{ color: "#cbd5e1" }}>{item.label}</span>
             </div>
           ))}
         </div>
 
         {tooltip && (
           <div
-            className="fixed z-50 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg pointer-events-none"
-            style={{ left: tooltip.x, top: tooltip.y }}
+            style={{
+              position: "fixed", zIndex: 50, background: "#0f172a", color: "#fff",
+              fontSize: "12px", padding: "8px 12px", borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.4)", pointerEvents: "none",
+              left: tooltip.x, top: tooltip.y,
+            }}
           >
-            <p className="font-semibold">{tooltip.label}</p>
-            <p className="text-gray-300">Type: {tooltip.type}</p>
-            <p className="text-gray-300">District: {tooltip.district}</p>
+            <p style={{ fontWeight: 600, margin: 0 }}>{tooltip.label}</p>
+            <p style={{ color: "#94a3b8", margin: 0 }}>Type: {tooltip.type}</p>
+            <p style={{ color: "#94a3b8", margin: 0 }}>District: {tooltip.district}</p>
           </div>
         )}
       </div>
