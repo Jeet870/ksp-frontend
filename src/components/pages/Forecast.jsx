@@ -8,11 +8,22 @@ export default function Forecast({ auth }) {
 
   useEffect(() => {
     let cancelled = false;
+    const timeoutId = setTimeout(() => {
+      if (!cancelled) {
+        setError("Request timed out. The server may be slow or unreachable.");
+        setLoading(false);
+      }
+    }, 15000);
+
     getForecast(auth.token)
       .then((d) => { if (!cancelled) setData(d); })
       .catch((e) => { if (!cancelled) setError(e.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        clearTimeout(timeoutId);
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; clearTimeout(timeoutId); };
   }, [auth.token]);
 
   return (
@@ -31,11 +42,11 @@ export default function Forecast({ auth }) {
               Method: {data.method}
             </div>
 
-            {data.predictions.length === 0 && (
+            {(data.predictions || []).length === 0 && (
               <p>Not enough recent case history in {data.district} to project a forecast.</p>
             )}
 
-            {data.predictions.length > 0 && (
+            {(data.predictions || []).length > 0 && (
               <div className="msg-table-wrapper">
                 <table className="msg-table">
                   <thead>
