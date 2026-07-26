@@ -24,7 +24,14 @@ function App() {
     });
   };
 
-  const handleLogout = () => setAuth(null);
+  const handleLogout = () => {
+    setAuth(null);
+    // Force the URL back to a safe, universally-accessible page so a
+    // leftover role-specific path (e.g. /map, /analytics) from the
+    // previous officer's session can't be inherited by whoever logs in
+    // next on this browser.
+    window.location.href = "/chat";
+  };
 
   if (!auth) {
     return <LoginPage onLogin={handleLogin} />;
